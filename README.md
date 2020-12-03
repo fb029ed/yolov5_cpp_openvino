@@ -72,7 +72,7 @@ python3 ./yolov5/models/export.py --weights "+pt文件的路径+" --img 640 --ba
 执行这步之后可以获得onnx文件
 ### onnx模型到openvino格式的xml bin模型转换
 ### 1.openvino安装
-略,主要需要确保是最新版本的openvino,旧版本的不一定支持一些算子,经测试2020r1可用
+略,主要需要确保是最新版本的openvino,旧版本的不一定支持一些算子,经测试2020r4可用(不太确定,时间太久了,2020版本肯定有一个是可用的)
 ### 2.模型转换
 可以参考
 ### [如何将模型转换成OpenVINO格式](https://docs.cvmart.net/#/guide?id=%e5%a6%82%e4%bd%95%e5%b0%86%e6%a8%a1%e5%9e%8b%e8%bd%ac%e6%8d%a2%e6%88%90openvino%e6%a0%bc%e5%bc%8f)
@@ -87,4 +87,3 @@ python3 ./yolov5/models/export.py --weights "+pt文件的路径+" --img 640 --ba
 
 ## 其他
 yolov5的仓库还是很活跃的遇到问题可以多去那里找找
-
