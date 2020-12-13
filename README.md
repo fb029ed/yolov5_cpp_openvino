@@ -131,15 +131,15 @@ python ./models/export.py --weight .pt文件路径 --img 640 --batch 1
 
 需要注意的是在填入的.pt文件路径不存在时,该程序会自动下载官方预训练的模型作为转换的原始模型,转换完成则获得onnx格式的模型
 
-转换完成后可以使用Netron:https://github.com/lutzroeder/netron.git进行可视化.对于陌生的模型,该可视化工具对模型结构的认识有很大的帮助.
+转换完成后可以使用Netron:https://github.com/lutzroeder/netron.git 进行可视化.对于陌生的模型,该可视化工具对模型结构的认识有很大的帮助.
 
-![](./img/net.png)
+![](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/net.png)
 
 ### 2. onnx格式转换OpenVINO的xml和bin格式
 
 OpenVINO是一个功能丰富的跨平台边缘加速工具箱,本文用到了其中的模型优化工具和推理引擎两部分内容
 
-OpenVINO的安装配置可以参考https://docs.openvinotoolkit.org/2019_R2/_docs_install_guides_installing_openvino_linux.html,本文的所有实现基于在2020.4版本,为确保可用建议下载2020.4版本的OpenVINO
+OpenVINO的安装配置可以参考https://docs.openvinotoolkit.org/2019_R2/_docs_install_guides_installing_openvino_linux.html ,本文的所有实现基于在2020.4版本,为确保可用建议下载2020.4版本的OpenVINO
 
 安装完成后在~/.bashrc文件中添加如下内容,用于在终端启动时配置环境变量
 
@@ -239,7 +239,7 @@ infer_request->Infer();
 
 从Netron的可视化结果可知
 
-![](./img/output.png)
+![](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/output.png)
 
 网络只包含到输出三个检测头的部分，三个检测头分别对应80,40,和20的栅格尺寸,因此需要对三种尺寸的检测头输出结果依次解析,具体的解析过程在parse_yolov5函数中进行了实现
 
@@ -363,7 +363,7 @@ auto start = chrono::high_resolution_clock::now();
 
 检测结果如下
 
-![](./img/result.png)
+![](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/result.png)
 
 
 
