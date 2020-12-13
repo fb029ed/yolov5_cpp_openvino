@@ -133,7 +133,7 @@ python ./models/export.py --weight .pt文件路径 --img 640 --batch 1
 
 转换完成后可以使用Netron:https://github.com/lutzroeder/netron.git 进行可视化.对于陌生的模型,该可视化工具对模型结构的认识有很大的帮助.
 
-![](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/net.png)
+![error](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/net.png)
 
 ### 2. onnx格式转换OpenVINO的xml和bin格式
 
@@ -239,7 +239,7 @@ infer_request->Infer();
 
 从Netron的可视化结果可知
 
-![](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/output.png)
+![error](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/output.png)
 
 网络只包含到输出三个检测头的部分，三个检测头分别对应80,40,和20的栅格尺寸,因此需要对三种尺寸的检测头输出结果依次解析,具体的解析过程在parse_yolov5函数中进行了实现
 
@@ -363,7 +363,7 @@ auto start = chrono::high_resolution_clock::now();
 
 检测结果如下
 
-![](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/result.png)
+![error](https://github.com/fb029ed/yolov5_cpp_openvino/tree/master/img/result.png)
 
 
 
