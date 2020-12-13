@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Root directory of the script
+#SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+#/opt/intel/openvino/deployment_tools/model_optimizer/mo_tf.py \
+#--input_model ${SCRIPT_DIR}/ssd_inception_v2.pb \
+#--transformations_config /opt/intel/openvino_2020.1.023/deployment_tools/model_optimizer/extensions/front/tf/ssd_v2_support.json \
+#--tensorflow_object_detection_api_pipeline_config ${SCRIPT_DIR}/ssd_inception_v2_coco.config \
+#--output_dir ${SCRIPT_DIR}/openvino \
+#--model_name ssd_inception_v2 \
+#--input image_tensor
+
+#!/bin/bash
+
+# 在这里编写OpenVINO模型转换
+# 系统会将所选择的原始模型放在目录/usr/local/ev_sdk/model下，转换后的OpenVINO模型请放在model/openvino目录下，
+# 建议所有路径都使用绝对路径
+
+# 获取当前脚本的绝对路径
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+mkdir ${SCRIPT_DIR}/openvino
+python3 /opt/intel/openvino/deployment_tools/model_optimizer/mo_onnx.py --input_model /usr/local/ev_sdk/model/best.onnx --output_dir ${SCRIPT_DIR}/openvino 
+
+#mkdir /usr/local/ev_sdk/model/openvino
+#mv SCRIPT_DIR/best.xml /usr/local/ev_sdk/model/openvino/best.xml
+#mv SCRIPT_DIR/best.bin /usr/local/ev_sdk/model/openvino/best.bin
+

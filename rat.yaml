@@ -1,5 +1,0 @@
-train: /project/train/src_repo/dataset/images/train/
-val: /project/train/src_repo/dataset/images/val/
-nc: 1
-names: ['rat']
-

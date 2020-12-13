@@ -1,0 +1,82 @@
+cmake_minimum_required(VERSION 3.5)
+project(ji)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_INSTALL_PREFIX "/usr/local/ev_sdk")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(ADDITIONAL_RPATH "/opt/intel/openvino/deployment_tools/ngraph/lib:\
+/opt/intel/opencl:\
+/opt/intel/openvino/deployment_tools/inference_engine/external/hddl/lib:\
+/opt/intel/openvino/deployment_tools/inference_engine/external/gna/lib:\
+/opt/intel/openvino/deployment_tools/inference_engine/external/mkltiny_lnx/lib:\
+/opt/intel/openvino/deployment_tools/inference_engine/external/tbb/lib:\
+/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64:\
+/usr/local/ev_sdk/build:\
+/usr/local/ev_sdk/3rd/cJSON/build")
+
+#以下指令用于去除警告信息
+add_definitions(-w)
+#以下指令用于开启eigen的openmp优化
+add_definitions(-fopenmp)
+FIND_PACKAGE( OpenMP REQUIRED)
+if(OPENMP_FOUND)
+    message("OPENMP FOUND") 
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}") 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}") 
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}") 
+    set(CMAKE_SHARE_LINKER_FLAGS "${CMAKE_SHARE_LINKER_FLAGS} ${OpenMP_SHARE_LINKER_FLAGS}") 
+endif()
+
+include_directories(
+    /opt/intel/openvino/deployment_tools/inference_engine/include/
+    /opt/intel/openvino/deployment_tools/ngraph/include/
+)
+# 设置RPATH，使编译好的libji.so在运行时能够找到OpenVINO的依赖库
+# 设置RPATH，使编译好的libji.so在运行时能够找到依赖库
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+if (DEFINED ADDITIONAL_RPATH)
+    set(CMAKE_INSTALL_RPATH "${ADDITIONAL_RPATH}:${CMAKE_INSTALL_RPATH}")
+endif ()
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+# 设置Tensorflow路径
+#fire20190327_523.jpg
+
+# 使用pkg-config查找必要的依赖包
+find_package(OpenCV REQUIRED)
+find_library(glog REQUIRED)
+find_package(PkgConfig REQUIRED)
+set(InferenceEngine_DIR "/opt/intel/openvino/deployment_tools/inference_engine/share")
+find_package(InferenceEngine)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rd/cJSON)
+
+# 编译libji.so
+list(APPEND libji_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ji.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/my_detector.cpp)
+add_library (${PROJECT_NAME} SHARED ${libji_SOURCES})
+target_include_directories(${PROJECT_NAME}
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        PUBLIC ${OpenCV_INCLUDE_DIR}
+        PUBLIC ${InferenceEngine_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME}
+        ${OpenCV_LIBS}
+        glog
+        cjson
+        ${InferenceEngine_LIBRARIES})
+
+# 以下是EV_SDK所依赖和需要测试接口的程序&库，请勿修改！！！
+# --- BEGIN EV_SDK DEPENDENCIES ---
+# 编译 JI API 测试程序
+add_executable(test-ji-api ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
+target_link_libraries(test-ji-api
+        ${OpenCV_LIBS}
+        cjson
+        glog
+        ${PROJECT_NAME}
+        )
+# Install libji.so
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+# Install test-ji-api
+install(TARGETS test-ji-api DESTINATION bin)
+# ---  END EV_SDK DEPENDENCIES  ---
