@@ -266,11 +266,11 @@ for (auto &output : _outputinfo) {
 bool Detector::parse_yolov5(const Blob::Ptr &blob,int net_grid,float cof_threshold,
     vector<Rect>& o_rect,vector<float>& o_rect_cof){
     vector<int> anchors = get_anchors(net_grid);
-   LockedMemory<const void> blobMapped = as<MemoryBlob>(blob)->rmap();
-   const float *output_blob = blobMapped.as<float *>();
-   //80个类是85,一个类是6,n个类是n+5
-   //int item_size = 6;
-   int item_size = 85;
+    LockedMemory<const void> blobMapped = as<MemoryBlob>(blob)->rmap();
+    const float *output_blob = blobMapped.as<float *>();
+    //80个类是85,一个类是6,n个类是n+5
+    //int item_size = 6;
+    int item_size = 85;
     size_t anchor_n = 3;
     for(int n=0;n<anchor_n;++n)
         for(int i=0;i<net_grid;++i)
@@ -354,9 +354,9 @@ OpenVNIO自带的opencv提供了NMS的一种实现,因而直接进行调用
 
 ```c++
 auto start = chrono::high_resolution_clock::now();
- auto end = chrono::high_resolution_clock::now();
- std::chrono::duration<double> diff = end - start;
- cout<<"use "<<diff.count()<<" s" << endl;
+auto end = chrono::high_resolution_clock::now();
+std::chrono::duration<double> diff = end - start;
+cout<<"use "<<diff.count()<<" s" << endl;
 ```
 
 原始的未经优化的CPU运行的yolov5,推理时间在240ms左右,测试平台为intel corei7 6700hq
