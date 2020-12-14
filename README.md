@@ -1,14 +1,12 @@
- 
-
 # c++实现yolov5的OpenVINO部署
 
-> 本文介绍了一种使用c++实现的,使用OpenVINO部署yolov5的方法
+> 本文介绍了一种使用c++实现的,使用OpenVINO部署yolov5的方法.
 >
-> 此方法在2020年9月结束的极市开发者榜单中取得后厨老鼠识别赛题第四名
+> 此方法在2020年9月结束的极市开发者榜单中取得后厨老鼠识别赛题第四名.
 >
-> 2020年12月,注意到yolov5有了许多变化,对部署流程重新进行了测试,并进行了整理
+> 2020年12月,注意到yolov5有了许多变化,对部署流程重新进行了测试,并进行了整理.
 >
-> 希望能给需要的朋友一些参考,节省一些踩坑的时间
+> 希望能给需要的朋友一些参考,节省一些踩坑的时间.
 
 
 
@@ -20,7 +18,7 @@
 git clone https://github.com/ultralytics/yolov5.git
 ```
 
-本文编辑的时间是2020年12月3日,官方最新的releases是v3.1 在v3.0的版本中,官网有如下的声明
+本文编辑的时间是2020年12月3日,官方最新的releases是v3.1,在v3.0的版本中,官网有如下的声明
 
 > * August 13, 2020**: [v3.0 release](https://github.com/ultralytics/yolov5/releases/tag/v3.0): nn.Hardswish() activations, data autodownload, native AMP.
 
@@ -46,7 +44,7 @@ yolov5官方的指南: https://github.com/ultralytics/yolov5/wiki/Train-Custom-D
 
 这三个文件分别对应s(小尺寸模型),ｍ(中尺寸模型)和l(大尺寸模型)的结构描述信息
 
-其中为了自己实现的训练常常需要更改以下两个参数
+其中为了实现自己的训练常常需要更改以下两个参数
 
 * nc
 
@@ -70,9 +68,7 @@ yolov5官方的指南: https://github.com/ultralytics/yolov5/wiki/Train-Custom-D
 
 部分的数据要求
 
-注意标注格式是class x_center y_center width height
-
-其中x_center y_center width height均是根据图像尺寸归一化的0到1之间的数值
+注意标注格式是class x_center y_center width height,其中x_center y_center width height均是根据图像尺寸归一化的0到1之间的数值.
 
 ### 3. 执行训练
 
@@ -82,24 +78,24 @@ python ~/src_repo/yolov5/train.py --batch 16 --epochs 10 --data ~/src_repo/rat.y
 
 其中
 
-* --data　参数后面需要填充的是训练数据的说明文件．其中需要说明训练集，测试集，种类数目和种类名称等信息，具体格式可以参考yolov5/data/coco.yaml
-* --cfg　为在训练准备阶段完成的模型结构描述文件
-* --weights　后面跟预训练模型的路径,如果是""则重新训练一个模型.推荐使用预训练模型继续训练,不使用该参数则默认使用预训练模型
-* --noautoanchor　该参数可选，使用该参数则禁止自适应anchor计算，使用--cfg文件中提供的原始锚框
+* --data　参数后面需要填充的是训练数据的说明文件．其中需要说明训练集，测试集，种类数目和种类名称等信息，具体格式可以参考yolov5/data/coco.yaml.
+* --cfg　为在训练准备阶段完成的模型结构描述文件.
+* --weights　后面跟预训练模型的路径,如果是""则重新训练一个模型.推荐使用预训练模型继续训练,不使用该参数则默认使用预训练模型.
+* --noautoanchor　该参数可选，使用该参数则禁止自适应anchor计算，使用--cfg文件中提供的原始锚框.
 
 
 
 ## 模型转换
 
-经过训练模型的原始存储格式为.pt格式，为了实现使用OpenVINO的部署，需要首先转换为.onnx的存储格式，之后再转化为OpenVINO需要的.xml和.bin的存储格式
+经过训练,模型的原始存储格式为.pt格式，为了实现OpenVINO部署，需要首先转换为.onnx的存储格式，之后再转化为OpenVINO需要的.xml和.bin的存储格式.
 
 ### 1. pt格式转onnx格式
 
-这一步的转换主要由yolov5/models/export.py脚本实现
+这一步的转换主要由yolov5/models/export.py脚本实现.
 
 可以参考yolov5提供的简单教程:https://github.com/ultralytics/yolov5/issues/251
 
-该教程可以获取onnx模型,但直接按照官方方式获取的onnx模型其中存在OpenVINO模型转换中不支持的运算,因此,使用该脚本之前需要进行一些更改
+使用该教程中的方法可以获取onnx模型,但直接按照官方方式获取的onnx模型其中存在OpenVINO模型转换中不支持的运算,因此,使用该脚本之前需要进行一些更改:
 
 * opset_version
 
@@ -110,8 +106,8 @@ torch.onnx.export(model, img, f, verbose=False, opset_version=12, input_names=['
                           output_names=['classes', 'boxes'] if y is None else ['output'])
 ```
 
-opset_version=12,将导致后面的OpenVINO模型装换有未支持的运算
-因此设置为opset_version=10
+opset_version=12,将导致后面的OpenVINO模型装换时遇到未支持的运算
+因此设置为opset_version=10.
 
 * Detect layer export
 
@@ -119,17 +115,17 @@ opset_version=12,将导致后面的OpenVINO模型装换有未支持的运算
 model.model[-1].export = True  
 ```
 
-设置为True则Detect层(包含nms,锚框计算等)不会输出到模型中
+设置为True则Detect层(包含nms,锚框计算等)不会输出到模型中.
 
-设置为False包含Detect层的模型无法通过onnx到OpenVINO格式模型的转换
+设置为False包含Detect层的模型无法通过onnx到OpenVINO格式模型的转换.
 
-需要执行如下指令
+需要执行如下指令:
 
 ```shell
 python ./models/export.py --weight .pt文件路径 --img 640 --batch 1
 ```
 
-需要注意的是在填入的.pt文件路径不存在时,该程序会自动下载官方预训练的模型作为转换的原始模型,转换完成则获得onnx格式的模型
+需要注意的是在填入的.pt文件路径不存在时,该程序会自动下载官方预训练的模型作为转换的原始模型,转换完成则获得onnx格式的模型.
 
 转换完成后可以使用Netron:https://github.com/lutzroeder/netron.git 进行可视化.对于陌生的模型,该可视化工具对模型结构的认识有很大的帮助.
 
@@ -137,18 +133,18 @@ python ./models/export.py --weight .pt文件路径 --img 640 --batch 1
 
 ### 2. onnx格式转换OpenVINO的xml和bin格式
 
-OpenVINO是一个功能丰富的跨平台边缘加速工具箱,本文用到了其中的模型优化工具和推理引擎两部分内容
+OpenVINO是一个功能丰富的跨平台边缘加速工具箱,本文用到了其中的模型优化工具和推理引擎两部分内容.
 
-OpenVINO的安装配置可以参考https://docs.openvinotoolkit.org/2019_R2/_docs_install_guides_installing_openvino_linux.html ,本文的所有实现基于在2020.4版本,为确保可用建议下载2020.4版本的OpenVINO
+OpenVINO的安装配置可以参考https://docs.openvinotoolkit.org/2019_R2/_docs_install_guides_installing_openvino_linux.html ,本文的所有实现基于2020.4版本,为确保可用,建议下载2020.4版本的OpenVINO.
 
-安装完成后在~/.bashrc文件中添加如下内容,用于在终端启动时配置环境变量
+安装完成后在~/.bashrc文件中添加如下内容,用于在终端启动时配置环境变量.
 
 ```shell
 source /opt/intel/openvino/bin/setupvars.sh
 source /opt/intel/openvino/opencv/setupvars.sh
 ```
 
-安装完成后运行如下脚本实现onnx模型到xml bin模型的转换
+安装完成后运行如下脚本实现onnx模型到xml bin模型的转换.
 
 ```shell
 python /opt/intel/openvino/deployment_tools/model_optimizer/mo_onnx.py --input_model .onnx文件路径  --output_dir 期望模型输出的路径
@@ -160,17 +156,17 @@ python /opt/intel/openvino/deployment_tools/model_optimizer/mo_onnx.py --input_m
 
 ## 使用OpenVINO进行推理部署
 
-OpenVINO除了模型优化工具外,还提供了一套运行时推理引擎
+OpenVINO除了模型优化工具外,还提供了一套运行时推理引擎.
 
-想使用OpenVINO的模型进行推理部署,有两种方式,第一种方式是使用OpenVINO原生的sdk,另外一种方式是使用支持OpenVINO的opencv(比如OpenVINO自带的opencv)进行部署,首先对原生sdk的部署方式进行介绍.
+想使用OpenVINO的模型进行推理部署,有两种方式,第一种方式是使用OpenVINO原生的sdk,另外一种方式是使用支持OpenVINO的opencv(比如OpenVINO自带的opencv)进行部署,本文对原生sdk的部署方式进行介绍.
 
-OpenVINO提供了相对丰富的例程,本文中实现的yolov5的部署参考了/opt/intel/openvino/deployment_tools/inference_engine/demos/object_detection_demo_yolov3_async文件夹中yolov3的实现方式
+OpenVINO提供了相对丰富的例程,本文中实现的yolov5的部署参考了/opt/intel/openvino/deployment_tools/inference_engine/demos/object_detection_demo_yolov3_async文件夹中yolov3的实现方式.
 
 ### 1. 推理引擎的初始化
 
-首先需要进行推理引擎的初始化,此部分代码封装在detector.cpp的init函数
+首先需要进行推理引擎的初始化,此部分代码封装在detector.cpp的init函数.
 
-主要流程如下
+主要流程如下:
 
 ```c++
 Core ie;
@@ -197,17 +193,17 @@ _network =  ie.LoadNetwork(cnnNetwork, "CPU");
 
 ### 2. 数据准备
 
-为了适配网络的输入数据格式要求,需要对原始的opencv读取的Mat数据进行预处理
+为了适配网络的输入数据格式要求,需要对原始的opencv读取的Mat数据进行预处理.
 
 * resize
 
-最简单的方式是将输入图像直接resize到640*640尺寸,此种方式会造成部分物体变形,识别准确率会受到部分影响,简单起见,在demo代码里使用了该方式
+最简单的方式是将输入图像直接resize到640*640尺寸,此种方式会造成部分物体失真变形,识别准确率会受到部分影响,简单起见,在demo代码里使用了该方式.
 
-在竞赛代码中,为了追求正确率,图像缩放的时候需要按图像原始比例将图像的长或宽缩放到640.假设长被放大到640,宽按照长的变换比例无法达到640,则在图像的两边填充黑框确保输入图像总尺寸为640*640.竞赛代码中使用了该种缩放方式,需要注意的是如果使用该种缩放方式,在获取结果时需要将结果转换为在原始图像中的坐标
+在竞赛代码中,为了追求正确率,图像缩放的时候需要按图像原始比例将图像的长或宽缩放到640.假设长被放大到640,宽按照长的变换比例无法达到640,则在图像的两边填充黑边确保输入图像总尺寸为640*640.竞赛代码中使用了该种缩放方式,需要注意的是如果使用该种缩放方式,在获取结果时需要将结果转换为在原始图像中的坐标.
 
 * 颜色通道转换
 
-鉴于opencv和pytorch的颜色通道差异,opencv是BGR通道,pytorch是RGB,在输入网络之前,需要进行通道转换
+鉴于opencv和pytorch的颜色通道差异,opencv是BGR通道,pytorch是RGB,在输入网络之前,需要进行通道转换.
 
 * 推断请求和blob填充
 
@@ -241,7 +237,7 @@ infer_request->Infer();
 
 ![output](https://github.com/fb029ed/yolov5_cpp_openvino/blob/master/img/output.png)
 
-网络只包含到输出三个检测头的部分，三个检测头分别对应80,40,和20的栅格尺寸,因此需要对三种尺寸的检测头输出结果依次解析,具体的解析过程在parse_yolov5函数中进行了实现
+网络只包含到输出三个检测头的部分，三个检测头分别对应80,40,和20的栅格尺寸,因此需要对三种尺寸的检测头输出结果依次解析,具体的解析过程在parse_yolov5函数中进行了实现:
 
 ```c++
 //获取各层结果
@@ -259,7 +255,7 @@ for (auto &output : _outputinfo) {
 
 * 对检测头的内容进行解析
 
-这部分主要是使用c++将yolov5代码中的detect层内容重新实现一下,主要代码实现如下
+这部分主要是使用c++将yolov5代码中的detect层内容重新实现一下,主要代码实现如下:
 
 ```c++
 //注意此处的阈值是框和物体prob乘积的阈值
@@ -319,19 +315,19 @@ bool Detector::parse_yolov5(const Blob::Ptr &blob,int net_grid,float cof_thresho
 }
 ```
 
-这一部分最艰难的是搞清楚输出数据的排列方式,一开始我也试了很多次,最后才得到了正确的输出
+这一部分最艰难的是搞清楚输出数据的排列方式,一开始我也试了很多次,最后才得到了正确的输出.
 
-需要注意的第一点是,按照输出排列方式读取的数值不是最终我们需要的结果,需要进行一些计算来进行转换
+需要注意的一点是,按照输出排列方式读取的数值不是最终我们需要的结果,需要进行一些计算来进行转换,
 
-转换的依据可以参考yolov5/models/yolo.py中forward函数的实现
+转换的依据可以参考yolov5/models/yolo.py中forward函数的实现.
 
-注意这里有一个参数cof_threshold,其计算方式是框置信度乘以物品置信度,如果识别效果不佳,则需要对该数值进行调整
+注意这里有一个参数cof_threshold,其计算方式是框置信度乘以物品置信度,如果识别效果不佳,则需要对该数值进行调整.
 
 * NMS获取最终结果
 
-经过以上步骤,原始的框信息存储在origin_rect变量中,还需要通过NMS去除同一个物体多余的框
+经过以上步骤,原始的框信息存储在origin_rect变量中,还需要通过NMS去除同一个物体多余的框.
 
-OpenVNIO自带的opencv提供了NMS的一种实现,因而直接进行调用
+OpenVNIO自带的opencv提供了NMS的一种实现,因而直接进行调用.
 
 ```c++
  vector<int> final_id;
@@ -346,11 +342,11 @@ OpenVNIO自带的opencv提供了NMS的一种实现,因而直接进行调用
     }
 ```
 
-其中origin_rect为原始矩形,origin_rect_cof为矩形对应的置信度,_cof_threshold为置信度(框置信度乘以物品置信度)阈值,_nms_area_threshold是重叠百分比多少则算为一个物体的阈值,final_id为目标矩形在origin_rect中的下标
+其中origin_rect为原始矩形,origin_rect_cof为矩形对应的置信度,_cof_threshold为置信度(框置信度乘以物品置信度)阈值,_nms_area_threshold是重叠百分比多少则算为一个物体的阈值,final_id为目标矩形在origin_rect中的下标.
 
 ### 4. 性能测试
 
-计时实现如下
+计时实现如下:
 
 ```c++
 auto start = chrono::high_resolution_clock::now();
@@ -359,9 +355,9 @@ std::chrono::duration<double> diff = end - start;
 cout<<"use "<<diff.count()<<" s" << endl;
 ```
 
-原始的未经优化的CPU运行的yolov5,推理时间在240ms左右,测试平台为intel corei7 6700hq
+原始的未经优化的CPU运行的yolov5,推理时间在240ms左右,测试平台为intel corei7 6700hq.
 
-检测结果如下
+检测结果如下:
 
 ![result](https://github.com/fb029ed/yolov5_cpp_openvino/blob/master/img/result.png)
 
@@ -383,29 +379,29 @@ _network =  ie.LoadNetwork(cnnNetwork, "CPU");
 _network =  ie.LoadNetwork(cnnNetwork, "GPU");
 ```
 
-如果OpenVINO环境配置设置无误程序应该可以直接运行
+如果OpenVINO环境配置设置无误程序应该可以直接运行.
 
-检测环境是否配置无误的方法是运行
+检测环境是否配置无误的方法是运行:
 
 /opt/intel/openvino/deployment_tools/demo中的./demo_security_barrier_camera.sh
 
-若成功运行则cpu环境正常
+若成功运行则cpu环境正常.
 
-./demo_security_barrier_camera.sh -d GPU 运行正常则gpu环境运行正常
+./demo_security_barrier_camera.sh -d GPU 运行正常则gpu环境运行正常.
 
 * 使用openmp进行并行化
 
-在推理之外的数据预处理和解析中存在大量循环,这些循环都可以利用openmp进行并行优化
+在推理之外的数据预处理和解析中存在大量循环,这些循环都可以利用openmp进行并行优化.
 
 * 模型优化如定点化为int8类型
 
-在模型转换时通过设置参数可以实现模型的定点化
+在模型转换时通过设置参数可以实现模型的定点化.
 
 
 
 ## git项目使用
 
-项目地址:
+项目地址:https://github.com/fb029ed/yolov5_cpp_openvino
 
 * demo部分完成了yolov5原始模型的部署
 
