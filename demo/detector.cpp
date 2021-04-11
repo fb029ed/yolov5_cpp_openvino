@@ -6,7 +6,8 @@ Detector::~Detector(){}
 
 //注意此处的阈值是框和物体prob乘积的阈值
 bool Detector::parse_yolov5(const Blob::Ptr &blob,int net_grid,float cof_threshold,
-    vector<Rect>& o_rect,vector<float>& o_rect_cof){
+    vector<Rect>& o_rect,vector<float>& o_rect_cof,
+    vector<int> &classId){
     vector<int> anchors = get_anchors(net_grid);
    LockedMemory<const void> blobMapped = as<MemoryBlob>(blob)->rmap();
    const float *output_blob = blobMapped.as<float *>();
@@ -32,14 +33,22 @@ bool Detector::parse_yolov5(const Blob::Ptr &blob,int net_grid,float cof_thresho
                
                 double max_prob = 0;
                 int idx=0;
-                for(int t=5;t<85;++t){
-                    double tp= output_blob[n*net_grid*net_grid*item_size + i*net_grid*item_size + j *item_size+ t];
-                    tp = sigmoid(tp);
-                    if(tp > max_prob){
-                        max_prob = tp;
-                        idx = t;
-                    }
-                }
+                // for(int t=5;t<85;++t){
+                //     double tp= output_blob[n*net_grid*net_grid*item_size + i*net_grid*item_size + j *item_size+ t];
+                //     tp = sigmoid(tp);
+                //     if(tp > max_prob){
+                //         max_prob = tp;
+                //         idx = t;
+                //     }
+                // }
+
+                for (int t = 0; t < item_size; ++t) {
+					double tp = sigmoid(output_blob[n*net_grid*net_grid*item_size + i * net_grid*item_size + j * item_size + t]);
+					if (tp > max_prob) {
+						max_prob = tp;
+						idx = t-5;
+					}
+				}
                 float cof = box_prob * max_prob;                
                 //对于边框置信度小于阈值的边框,不关心其他数值,不进行计算减少计算量
                 if(cof < cof_threshold)
@@ -55,6 +64,7 @@ bool Detector::parse_yolov5(const Blob::Ptr &blob,int net_grid,float cof_thresho
                 Rect rect = Rect(round(r_x),round(r_y),round(w),round(h));
                 o_rect.push_back(rect);
                 o_rect_cof.push_back(cof);
+                classId.push_back(idx);
             }
     if(o_rect.size() == 0) return false;
     else return true;
@@ -118,12 +128,19 @@ bool Detector::process_frame(Mat& inframe,vector<Object>& detected_objects){
     //获取各层结果
     vector<Rect> origin_rect;
     vector<float> origin_rect_cof;
+    vector<int> classId;
     int s[3] = {80,40,20};
     int i=0;
     for (auto &output : _outputinfo) {
+        //用于保存解析结果的临时vector 
+		vector<cv::Rect> origin_rect_temp;
+		vector<float> origin_rect_cof_temp;
         auto output_name = output.first;
         Blob::Ptr blob = infer_request->GetBlob(output_name);
-       parse_yolov5(blob,s[i],_cof_threshold,origin_rect,origin_rect_cof);
+        parse_yolov5(blob,s[i],_cof_threshold,origin_rect,origin_rect_cof, classId);
+        origin_rect.insert(origin_rect.end(), origin_rect_temp.begin(), origin_rect_temp.end());
+		origin_rect_cof.insert(origin_rect_cof.end(), origin_rect_cof_temp.begin(), origin_rect_cof_temp.end());
+
         ++i;
     }
     //后处理获得最终检测结果
@@ -134,8 +151,9 @@ bool Detector::process_frame(Mat& inframe,vector<Object>& detected_objects){
         Rect resize_rect= origin_rect[final_id[i]];
         detected_objects.push_back(Object{
             origin_rect_cof[final_id[i]],
-            "",resize_rect
+            className[classId[final_id[i]]],resize_rect
         });
+        cout << className[classId[final_id[i]]] << endl;
     }
     return true;
 }
