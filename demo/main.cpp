@@ -4,6 +4,7 @@ int main(int argc, char const *argv[])
 {
     Detector* detector = new Detector;
     string xml_path = "../res/yolov5s.xml";
+    // string xml_path = "../weights/yolov5s.xml";
     detector->init(xml_path,0.1,0.5);
     /*
     VideoCapture capture;
@@ -41,7 +42,18 @@ int main(int argc, char const *argv[])
         int height = detected_objects[i].rect.height;
         Rect rect(xmin, ymin, width, height);//左上坐标（x,y）和矩形的长(x)宽(y)
         cv::rectangle(osrc, rect, Scalar(0, 0, 255),1, LINE_8,0);
+        cout << "detected_objects[i].name：" << detected_objects[i].name << endl;
+        putText(osrc, detected_objects[i].name,
+				cv::Point(xmin, ymin - 10),
+				cv::FONT_HERSHEY_SIMPLEX,
+				0.7,
+				cv::Scalar(0, 255, 0));
     }
+    putText(osrc, "" + to_string(diff.count()),
+			cv::Point(5, 20),
+			cv::FONT_HERSHEY_SIMPLEX,
+			0.5,
+			cv::Scalar(0, 0, 0));
     imshow("result",osrc);
     waitKey(0);
 }
